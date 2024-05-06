@@ -137,7 +137,7 @@ async def test_account_lock_after_failed_logins(db_session, verified_user):
     max_login_attempts = get_settings().max_login_attempts
     for _ in range(max_login_attempts):
         await UserService.login_user(db_session, verified_user.email, "wrongpassword")
-    
+
     is_locked = await UserService.is_account_locked(db_session, verified_user.email)
     assert is_locked, "The account should be locked after the maximum number of failed login attempts."
 
@@ -161,3 +161,21 @@ async def test_unlock_user_account(db_session, locked_user):
     assert unlocked, "The account should be unlocked"
     refreshed_user = await UserService.get_by_id(db_session, locked_user.id)
     assert not refreshed_user.is_locked, "The user should no longer be locked"
+# Test the pagination functionality more thoroughly. For example, test what happens when you request a page that should be empty.
+async def test_list_users_with_empty_page(db_session, users_with_same_role_50_users):
+    users_page = await UserService.list_users(db_session, skip=100, limit=10)
+    assert len(users_page) == 0
+
+# Test the behavior of the system when trying to verify the email of a non-existent user.
+async def test_verify_email_non_existent_user(db_session):
+    non_existent_user_id = "non-existent-id"
+    token = "valid_token_example"
+    result = await UserService.verify_email_with_token(db_session, non_existent_user_id, token)
+    assert result is False
+
+# Test updating a user's role.
+async def test_update_user_role(db_session, user):
+    new_role = UserRole.ADMIN if user.role != UserRole.ADMIN else UserRole.USER
+    updated_user = await UserService.update(db_session, user.id, {"role": new_role.name})
+    assert updated_user is not None
+    assert updated_user.role == new_role.name  # Convert the enum to a string before comparing
