@@ -75,8 +75,12 @@ class UserService:
             await session.commit()
             await email_service.send_verification_email(new_user)
             return new_user
-        except ValidationError as e:
-            logger.error(f"Validation error during user creation: {e}")
+        except SQLAlchemyError as e:
+            logger.error(f"Database error: {e}")
+            await session.rollback()
+            return None
+        except Exception as e:
+            logger.error(f"Error during user creation: {e}")
             return None
 
     @classmethod
