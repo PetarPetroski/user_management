@@ -14,19 +14,21 @@ def get_settings() -> Settings:
     return Settings()
 
 def get_email_service() -> EmailService:
+    print("Creating TemplateManager")
     template_manager = TemplateManager()
+    print("Creating EmailService")
     return EmailService(template_manager=template_manager)
 
 async def get_db() -> AsyncSession:
-    """Dependency that provides a database session for each request."""
+    print("Creating session factory")
     async_session_factory = Database.get_session_factory()
     async with async_session_factory() as session:
         try:
+            print("Yielding session")
             yield session
         except Exception as e:
+            print(f"Error in get_db: {e}")
             raise HTTPException(status_code=500, detail=str(e))
-        
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 def get_current_user(token: str = Depends(oauth2_scheme)):

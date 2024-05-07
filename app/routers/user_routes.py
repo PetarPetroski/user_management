@@ -19,6 +19,7 @@ Key Highlights:
 """
 
 from builtins import dict, int, len, str
+import logging
 from datetime import timedelta
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Response, status, Request
@@ -68,7 +69,7 @@ async def get_user(user_id: UUID, request: Request, db: AsyncSession = Depends(g
         last_login_at=user.last_login_at,
         created_at=user.created_at,
         updated_at=user.updated_at,
-        links=create_user_links(user.id, request)  
+        links=create_user_links(user.id, request)
     )
 
 # Additional endpoints for update, delete, create, and list users follow a similar pattern, using
@@ -143,12 +144,12 @@ async def create_user(user: UserCreate, request: Request, db: AsyncSession = Dep
     existing_user = await UserService.get_by_email(db, user.email)
     if existing_user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already exists")
-    
+
     created_user = await UserService.create(db, user.model_dump(), email_service)
     if not created_user:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create user")
-    
-    
+
+
     return UserResponse.model_construct(
         id=created_user.id,
         bio=created_user.bio,
@@ -179,9 +180,9 @@ async def list_users(
     user_responses = [
         UserResponse.model_validate(user) for user in users
     ]
-    
+
     pagination_links = generate_pagination_links(request, skip, limit, total_users)
-    
+
     # Construct the final response with pagination details
     return UserListResponse(
         items=user_responses,
@@ -238,10 +239,13 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Async
 async def verify_email(user_id: UUID, token: str, db: AsyncSession = Depends(get_db), email_service: EmailService = Depends(get_email_service)):
     """
     Verify user's email with a provided token.
-    
+
     - **user_id**: UUID of the user to verify.
     - **token**: Verification token sent to the user's email.
     """
-    if await UserService.verify_email_with_token(db, user_id, token):
-        return {"message": "Email verified successfully"}
+    try:
+        if await UserService.verify_email_with_token(db, user_id, token):
+            return {"message": "Email verified successfully"}
+    except Exception as e:
+        logging.error(f"Error verifying email: {e}")
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification token")

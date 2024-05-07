@@ -169,14 +169,18 @@ class UserService:
     @classmethod
     async def verify_email_with_token(cls, session: AsyncSession, user_id: UUID, token: str) -> bool:
         user = await cls.get_by_id(session, user_id)
-        if user and user.verification_token == token:
-            user.email_verified = True
-            user.verification_token = None  # Clear the token once used
-            user.role = UserRole.AUTHENTICATED
-            session.add(user)
-            await session.commit()
-            return True
-        return False
+        if user is None:
+            logging.error(f"No user found with id {user_id}")
+            return False
+        if user.verification_token != token:
+            logging.error(f"Token mismatch for user {user_id}. Expected: {user.verification_token}, Received: {token}")
+            return False
+        user.email_verified = True
+        user.verification_token = None  # Clear the token once used
+        user.role = UserRole.AUTHENTICATED
+        session.add(user)
+        await session.commit()
+        return True
 
     @classmethod
     async def count(cls, session: AsyncSession) -> int:
