@@ -1,4 +1,5 @@
 from builtins import range
+from datetime import datetime
 import pytest
 from sqlalchemy import select
 from app.dependencies import get_settings
@@ -179,3 +180,19 @@ async def test_update_user_role(db_session, user):
     updated_user = await UserService.update(db_session, user.id, {"role": new_role.name})
     assert updated_user is not None
     assert updated_user.role == new_role.name  # Convert the enum to a string before comparing
+
+async def test_list_users_filter_by_first_name(db_session, users):
+    users_page = await UserService.list_users(db_session, first_name="John")
+    assert all(user.first_name == "John" for user in users_page)
+
+async def test_list_users_filter_by_last_name(db_session, users):
+    users_page = await UserService.list_users(db_session, last_name="Doe")
+    assert all(user.last_name == "Doe" for user in users_page)
+
+async def test_list_users_filter_by_email(db_session, users):
+    users_page = await UserService.list_users(db_session, email="john.doe@example.com")
+    assert all(user.email == "john.doe@example.com" for user in users_page)
+
+async def test_list_users_filter_by_role(db_session, users):
+    users_page = await UserService.list_users(db_session, role="ADMIN")
+    assert all(user.role == "ADMIN" for user in users_page)
