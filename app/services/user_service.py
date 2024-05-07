@@ -120,30 +120,31 @@ class UserService:
 
 
     @classmethod
-    async def list_users(cls, session: AsyncSession, skip: int = 0, limit: int = 10, search: Optional[str] = None, status: Optional[str] = None, registration_date: Optional[datetime] = None) -> List[User]:
+    async def list_users(
+        cls,
+        session: AsyncSession,
+        skip: int = 0,
+        limit: int = 10,
+        first_name: Optional[str] = None,
+        last_name: Optional[str] = None,
+        email: Optional[str] = None,
+        role: Optional[str] = None,
+        status: Optional[str] = None,
+        registration_date: Optional[datetime] = None
+    ) -> List[User]:
         query = select(User).offset(skip).limit(limit)
 
-        if search:
-            try:
-                search_int = int(search)
-                query = query.where(
-                    or_(
-                        User.id == search_int,
-                        User.email.contains(search),
-                        cast(User.role, String).contains(search),
-                        User.first_name.contains(search),
-                        User.last_name.contains(search),
-                    )
-                )
-            except ValueError:
-                query = query.where(
-                    or_(
-                        User.email.contains(search),
-                        cast(User.role, String).contains(search),
-                        User.first_name.contains(search),
-                        User.last_name.contains(search),
-                    )
-                )
+        if first_name:
+            query = query.where(User.first_name.contains(first_name))
+
+        if last_name:
+            query = query.where(User.last_name.contains(last_name))
+
+        if email:
+            query = query.where(User.email.contains(email))
+
+        if role:
+            query = query.where(cast(User.role, String).contains(role))
 
         if status:
             query = query.where(User.status == status)
@@ -224,7 +225,17 @@ class UserService:
         return True
 
     @classmethod
-    async def count(cls, session: AsyncSession, search: Optional[str] = None, status: Optional[str] = None, registration_date: Optional[datetime] = None) -> int:
+    async def count(
+        cls,
+        session: AsyncSession,
+        search: Optional[str] = None,
+        first_name: Optional[str] = None,
+        last_name: Optional[str] = None,
+        email: Optional[str] = None,
+        role: Optional[str] = None,
+        status: Optional[str] = None,
+        registration_date: Optional[datetime] = None,
+    ) -> int:
         query = select(func.count()).select_from(User)
 
         if search:
@@ -235,6 +246,8 @@ class UserService:
                         User.id == search_int,
                         User.email.contains(search),
                         cast(User.role, String).contains(search),
+                        User.first_name.contains(search),
+                        User.last_name.contains(search),
                     )
                 )
             except ValueError:
@@ -242,8 +255,22 @@ class UserService:
                     or_(
                         User.email.contains(search),
                         cast(User.role, String).contains(search),
+                        User.first_name.contains(search),
+                        User.last_name.contains(search),
                     )
                 )
+
+        if first_name:
+            query = query.where(User.first_name == first_name)
+
+        if last_name:
+            query = query.where(User.last_name == last_name)
+
+        if email:
+            query = query.where(User.email == email)
+
+        if role:
+            query = query.where(User.role == role)
 
         if status:
             query = query.where(User.status == status)
