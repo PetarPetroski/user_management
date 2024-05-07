@@ -1,7 +1,9 @@
 from builtins import Exception, bool, classmethod, int, str
 from datetime import datetime, timezone
+from operator import or_
 import secrets
 from typing import Optional, Dict, List
+from sqlalchemy import or_
 from pydantic import ValidationError
 from sqlalchemy import func, null, update, select
 from sqlalchemy.exc import SQLAlchemyError
@@ -17,6 +19,8 @@ from app.models.user_model import UserRole
 import logging
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+from sqlalchemy import cast, String
+
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -114,9 +118,39 @@ class UserService:
         await session.commit()
         return True
 
+
     @classmethod
-    async def list_users(cls, session: AsyncSession, skip: int = 0, limit: int = 10) -> List[User]:
+    async def list_users(cls, session: AsyncSession, skip: int = 0, limit: int = 10, search: Optional[str] = None, status: Optional[str] = None, registration_date: Optional[datetime] = None) -> List[User]:
         query = select(User).offset(skip).limit(limit)
+
+        if search:
+            try:
+                search_int = int(search)
+                query = query.where(
+                    or_(
+                        User.id == search_int,
+                        User.email.contains(search),
+                        cast(User.role, String).contains(search),
+                        User.first_name.contains(search),
+                        User.last_name.contains(search),
+                    )
+                )
+            except ValueError:
+                query = query.where(
+                    or_(
+                        User.email.contains(search),
+                        cast(User.role, String).contains(search),
+                        User.first_name.contains(search),
+                        User.last_name.contains(search),
+                    )
+                )
+
+        if status:
+            query = query.where(User.status == status)
+
+        if registration_date:
+            query = query.where(User.registration_date >= registration_date)
+
         result = await cls._execute_query(session, query)
         return result.scalars().all() if result else []
 
@@ -190,14 +224,33 @@ class UserService:
         return True
 
     @classmethod
-    async def count(cls, session: AsyncSession) -> int:
-        """
-        Count the number of users in the database.
-
-        :param session: The AsyncSession instance for database access.
-        :return: The count of users.
-        """
+    async def count(cls, session: AsyncSession, search: Optional[str] = None, status: Optional[str] = None, registration_date: Optional[datetime] = None) -> int:
         query = select(func.count()).select_from(User)
+
+        if search:
+            try:
+                search_int = int(search)
+                query = query.where(
+                    or_(
+                        User.id == search_int,
+                        User.email.contains(search),
+                        cast(User.role, String).contains(search),
+                    )
+                )
+            except ValueError:
+                query = query.where(
+                    or_(
+                        User.email.contains(search),
+                        cast(User.role, String).contains(search),
+                    )
+                )
+
+        if status:
+            query = query.where(User.status == status)
+
+        if registration_date:
+            query = query.where(User.registration_date >= registration_date)
+
         result = await session.execute(query)
         count = result.scalar()
         return count

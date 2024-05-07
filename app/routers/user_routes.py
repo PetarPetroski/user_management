@@ -34,6 +34,8 @@ from app.services.jwt_service import create_access_token
 from app.utils.link_generation import create_user_links, generate_pagination_links
 from app.dependencies import get_settings
 from app.services.email_service import EmailService
+from typing import Optional
+from datetime import datetime
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 settings = get_settings()
@@ -166,16 +168,21 @@ async def create_user(user: UserCreate, request: Request, db: AsyncSession = Dep
     )
 
 
+
+
 @router.get("/users/", response_model=UserListResponse, tags=["User Management Requires (Admin or Manager Roles)"])
 async def list_users(
     request: Request,
     skip: int = 0,
     limit: int = 10,
+    search: Optional[str] = None,
+    status: Optional[str] = None,
+    registration_date: Optional[datetime] = None,
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))
 ):
-    total_users = await UserService.count(db)
-    users = await UserService.list_users(db, skip, limit)
+    total_users = await UserService.count(db, search, status, registration_date)
+    users = await UserService.list_users(db, skip, limit, search, status, registration_date)
 
     user_responses = [
         UserResponse.model_validate(user) for user in users
