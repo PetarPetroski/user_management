@@ -1,10 +1,19 @@
+# Petar Petroski Project Submission:
+
+## Github Actions:
+[[Github Actions Passed](https://github.com/PetarPetroski/user_management/actions/workflows/production.yml)]
+## Word Document Reflection:
+[[Reflection File](https://docs.google.com/document/d/1TSri2v-5SFK1s2rhf5-OYpUVTsb3yb6VYAw247Q5Wc8/edit?usp=sharing)]
+## Dockerhub:
+![Dockerhub Repo Screenshot](https://github.com/PetarPetroski/user_management/assets/45236464/c013baba-e35c-40ad-98c8-d49e7d8d7df0)
 
 
-# The User Management System Final Project: Your Epic Coding Adventure Awaits!! 🎉✨🔥
+
+# The User Management System Final Project: Your Epic Coding Adventure Awaits! 🎉✨🔥
 
 ## Introduction: Buckle Up for the Ride of a Lifetime 🚀🎬
 
-Welcome to the User Management System project - an epic open-source adventure crafted by the legendary Professor Keith Williams for his rockstar students at NJIT! 🏫👨‍🏫⭐ This project is your gateway to coding glory, providing a bulletproof foundation for a user management system that will blow your mind! 🤯 You'll bridge the gap between the realms of seasoned software pros and aspiring student developers like yourselves.
+Welcome to the User Management System project - an epic open-source adventure crafted by the legendary Professor Keith Williams for his rockstar students at NJIT! 🏫👨‍🏫⭐ This project is your gateway to coding glory, providing a bulletproof foundation for an event management system that will blow your mind! 🤯 You'll bridge the gap between the realms of seasoned software pros and aspiring student developers like yourselves. Brace yourselves for mind-blowing company tours, captivating guest speaker sessions, and realistic mock interviews that will give you an electrifying taste of the real deal! 💼⚡
 
 ### [Instructor Video - Project Overview and Tips](https://youtu.be/gairLNAp6mA) 🎥
 
@@ -22,7 +31,7 @@ Get ready to ascend to new heights with this legendary project:
 3. **Test Coverage**: Write additional tests to cover edge cases, error scenarios, and important functionalities - leave no stone unturned and no bug left behind! ✅🧪🕵️‍♂️
 4. **Feature Implementation**: Implement a brand new, mind-blowing feature and make your epic mark on the project, following best practices for coding, testing, and documentation like a true artisan. ✨🚀🎆
 5. **Collaboration**: Foster teamwork and collaboration through code reviews, issue tracking, and adhering to contribution guidelines - teamwork makes the dream work, and together you'll conquer worlds! 🤝💪🌍
-6. **Industry Readiness**: Prepare for the software industry by working on a project that simulates real-world development scenarios - level up your skills to super hero status  and become an unstoppable coding force! 🔝🚀🏆⚡
+6. **Industry Readiness**: Prepare for the software industry by working on a project that simulates real-world development scenarios - level up your skills to godlike levels and become an unstoppable coding force! 🔝🚀🏆⚡
 
 ## Submission and Grading: Your Chance to Shine 📝✏️📈
 
@@ -30,7 +39,7 @@ Get ready to ascend to new heights with this legendary project:
 
 2. **Commit History**: Show off your consistent hard work through your commit history like a true coding warrior. **Projects with less than 10 commits will get an automatic 0 - ouch!** 😬⚠️ A significant part of your project's evaluation will be based on your use of issues, commits, and following a professional development process like a boss - prove your coding prowess! 💻🔄🔥
 
-3. **Deployability**: Broken projects that don't deploy to Dockerhub or pass all the automated tests on GitHub actions will face point deductions - nobody likes a buggy app! 🐞☠️ Show the world your flawless coding skills!
+3. **Deployability**: Broken projects that don't deploy to Dockerhub or pass all the automated tests on GitHub actions will face point deductions - nobody likes a buggy app, except maybe Kafka! 🐞☠️ Show the world your flawless coding skills!
 
 ## Managing the Project Workload: Stay Focused, Stay Victorious ⏱️🧠⚡
 
