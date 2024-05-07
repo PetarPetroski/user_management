@@ -22,6 +22,7 @@ from builtins import dict, int, len, str
 import logging
 from datetime import timedelta
 from uuid import UUID
+from fastapi import Query
 from fastapi import APIRouter, Depends, HTTPException, Response, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,6 +35,8 @@ from app.services.jwt_service import create_access_token
 from app.utils.link_generation import create_user_links, generate_pagination_links
 from app.dependencies import get_settings
 from app.services.email_service import EmailService
+from typing import AsyncGenerator, Optional
+from datetime import datetime
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 settings = get_settings()
@@ -166,16 +169,45 @@ async def create_user(user: UserCreate, request: Request, db: AsyncSession = Dep
     )
 
 
+
+
 @router.get("/users/", response_model=UserListResponse, tags=["User Management Requires (Admin or Manager Roles)"])
 async def list_users(
     request: Request,
-    skip: int = 0,
-    limit: int = 10,
-    db: AsyncSession = Depends(get_db),
+    skip: int = Query(0, description="Number of items to skip"),
+    limit: int = Query(10, description="Maximum number of items to return"),
+    search: Optional[str] = Query(None, description="Search query to filter users"),
+    first_name: Optional[str] = Query(None, description="Filter users by first name"),
+    last_name: Optional[str] = Query(None, description="Filter users by last name"),
+    email: Optional[str] = Query(None, description="Filter users by email"),
+    role: Optional[str] = Query(None, description="Filter users by role"),
+    status: Optional[str] = Query(None, description="Filter users by status"),
+    db_gen: AsyncGenerator[AsyncSession, None] = Depends(get_db),
+    registration_date: Optional[datetime] = Query(None, description="Filter users by registration date"),
     current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))
 ):
-    total_users = await UserService.count(db)
-    users = await UserService.list_users(db, skip, limit)
+    # Get the AsyncSession object from the generator
+    async with db_gen as db:
+        total_users = await UserService.count(
+            db,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            role=role,
+            status=status,
+            registration_date=registration_date
+        )
+        users = await UserService.list_users(
+            db,
+            skip=skip,
+            limit=limit,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            role=role,
+            status=status,
+            registration_date=registration_date
+        )
 
     user_responses = [
         UserResponse.model_validate(user) for user in users
@@ -189,7 +221,7 @@ async def list_users(
         total=total_users,
         page=skip // limit + 1,
         size=len(user_responses),
-        links=pagination_links  # Ensure you have appropriate logic to create these links
+        links=pagination_links
     )
 
 
