@@ -242,3 +242,8 @@ def email_service():
         mock_service.send_verification_email.return_value = None
         mock_service.send_user_email.return_value = None
         return mock_service
+@pytest.fixture(scope="function")
+async def users(db_session, users_with_same_role_50_users):
+    # Combine the users from the other fixtures
+    users = users_with_same_role_50_users
+    return users
