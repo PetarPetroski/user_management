@@ -15,10 +15,14 @@ from uuid import UUID
 from app.services.email_service import EmailService
 from app.models.user_model import UserRole
 import logging
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
-
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
 class UserService:
     @classmethod
     async def _execute_query(cls, session: AsyncSession, query):
@@ -123,6 +127,13 @@ class UserService:
 
     @classmethod
     async def login_user(cls, session: AsyncSession, email: str, password: str) -> Optional[User]:
+        # Validate the input data
+        try:
+            UserLogin(email=email, password=password)
+        except ValueError as e:
+            logger.error(f"Invalid input data: {e}")
+            return None
+
         user = await cls.get_by_email(session, email)
         if user:
             if user.email_verified is False:
